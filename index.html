@@ -21,7 +21,7 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 .scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9998}
 .noise{position:fixed;top:0;left:0;width:100%;height:100%;opacity:0.025;pointer-events:none;z-index:9997;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
 .wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px}
-.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:60px 24px;position:relative}
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 24px 60px;position:relative}
 .hero-glow{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:600px;height:600px;background:radial-gradient(ellipse at center,rgba(78,204,163,0.07) 0%,transparent 70%);pointer-events:none;animation:pulse-glow 4s ease-in-out infinite}
 @keyframes pulse-glow{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:0.7}50%{transform:translate(-50%,-50%) scale(1.1);opacity:1}}
 .sprite-wrap{position:relative;margin-bottom:28px}
@@ -100,6 +100,11 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 .particle{position:fixed;pointer-events:none;z-index:2;font-family:var(--font-px);font-size:8px;color:var(--green);opacity:0;animation:float-up 6s ease-in infinite}
 @keyframes float-up{0%{opacity:0;transform:translateY(0)}10%{opacity:0.4}90%{opacity:0}100%{opacity:0;transform:translateY(-80vh)}}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:center;padding:14px 24px;background:rgba(8,8,16,0.7);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.05)}
+.nav-inner{display:flex;gap:8px;align-items:center}
+.nav-link{font-family:var(--font-px);font-size:6px;padding:7px 14px;color:var(--gray);text-decoration:none;border:1px solid transparent;transition:all 0.15s;letter-spacing:1px}
+.nav-link:hover,.nav-link.active{color:var(--green);border-color:rgba(78,204,163,0.4);background:rgba(78,204,163,0.06)}
+.nav-sep{color:var(--gray);font-family:var(--font-px);font-size:8px;opacity:0.3}
 </style>
 </head>
 <body>
@@ -107,6 +112,14 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 <div class="scanlines"></div>
 <div class="noise"></div>
 <canvas id="bg-canvas"></canvas>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-link active" href="index.html">[ HOME ]</a>
+    <span class="nav-sep">·</span>
+    <a class="nav-link" href="blog.html">[ BLOG ]</a>
+  </div>
+</nav>
 
 <div class="hero">
   <div class="hero-glow"></div>
@@ -136,12 +149,12 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
   <div class="hero-desc">Builder of games, systems, and tools.<br>Seeking Spring 2026 Co-op.</div>
   <div class="stats-row">
     <div class="stat">CLASS <span>SWE Intern</span></div>
-    <div class="stat">LEVEL <span>1A</span></div>
+    <div class="stat">LEVEL <span>1B</span></div>
     <div class="stat">BASE <span>Mississauga, ON</span></div>
     <div class="stat">SEEKING <span>Spring 2026</span></div>
   </div>
   <div class="cta-row">
-    <a class="btn" href="mailto:yashusjoshi@gmail.com">[ EMAIL ]</a>
+    <a class="btn" href="/cdn-cgi/l/email-protection#215840524954524b4e52494861464c40484d0f424e4c">[ EMAIL ]</a>
     <a class="btn" href="https://github.com/Yoshi-tech">[ GITHUB ]</a>
     <a class="btn" href="https://www.linkedin.com/in/yash-joshi-96a21b246/">[ LINKEDIN ]</a>
     <a class="btn red" href="#">[ RESUME PDF ]</a>
@@ -269,7 +282,7 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
 let W, H, stars = [], meteors = [], grid = [];
@@ -304,7 +317,7 @@ window.addEventListener('resize',()=>{resize();initStars();});
 const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});},{threshold:0.1});
 document.querySelectorAll('.pcard,.sblock,.xp-entry,.edu-box').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.5s ease,transform 0.5s ease,border-color 0.15s,box-shadow 0.15s';observer.observe(el);});
 const chars=['0','1','<','>','{','}','▸','★'];
-setInterval(()=>{if(document.querySelectorAll('.particle').length>8)return;const p=document.createElement('div');p.className='particle';p.textContent=chars[Math.floor(Math.random()*chars.length)];p.style.left=Math.random()*100+'vw';p.style.bottom='0';p.style.animationDuration=(4+Math.random()*4)+'s';p.style.animationDelay=Math.random()*2+'s';p.style.color=Math.random()<0.5?'var(--green)':'var(--purple)';document.body.appendChild(p);setTimeout(()=>p.remove(),8000);},800);
+setInterval(()=>{if(document.querySelectorAll('.particle').length>8)return;const p=document.createElement('div');p.className='particle';p.textContent=chars[Math.floor(Math.random()*chars.length)];p.style.left=Math.random()*100+'vw';p.style.bottom='0';p.style.animationDuration=(4+Math.random()*4)+'s';p.style.animationDelay=Math.random()*2+'s';p.style.fontSize=(6+Math.floor(Math.random()*6))+'px';p.style.color=Math.random()<0.5?'#4ecca3':Math.random()<0.5?'#7c5cbf':'#e94560';document.body.appendChild(p);setTimeout(()=>p.remove(),(8+Math.random()*4)*1000);},800);
 </script>
 </body>
 </html>
