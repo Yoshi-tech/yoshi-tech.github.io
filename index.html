@@ -106,6 +106,53 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 .nav-link{font-family:var(--font-px);font-size:6px;padding:7px 14px;color:var(--gray);text-decoration:none;border:1px solid transparent;transition:all 0.15s;letter-spacing:1px}
 .nav-link:hover,.nav-link.active{color:var(--green);border-color:rgba(78,204,163,0.4);background:rgba(78,204,163,0.06)}
 .nav-sep{color:var(--gray);font-family:var(--font-px);font-size:8px;opacity:0.3}
+
+/* ========== BOOT LOADER ========== */
+#boot-loader{position:fixed;inset:0;background:var(--black);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+#boot-loader.done{pointer-events:none}
+
+/* big scanline wipe overlay */
+#boot-wipe{position:absolute;inset:0;background:linear-gradient(180deg,transparent 0%,rgba(78,204,163,0.06) 50%,transparent 100%);height:200%;top:-100%;animation:none;pointer-events:none;z-index:2}
+
+/* static/glitch flash */
+#boot-static{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* corner brackets */
+.boot-bracket{position:absolute;width:60px;height:60px;opacity:0}
+.boot-bracket.tl{top:40px;left:40px;border-top:2px solid var(--green);border-left:2px solid var(--green)}
+.boot-bracket.tr{top:40px;right:40px;border-top:2px solid var(--green);border-right:2px solid var(--green)}
+.boot-bracket.bl{bottom:40px;left:40px;border-bottom:2px solid var(--green);border-left:2px solid var(--green)}
+.boot-bracket.br{bottom:40px;right:40px;border-bottom:2px solid var(--green);border-right:2px solid var(--green)}
+
+/* centre terminal box */
+#boot-box{position:relative;z-index:4;width:min(580px,90vw);border:1px solid rgba(78,204,163,0.3);background:rgba(8,8,20,0.97);padding:36px 40px;opacity:0;transform:scale(0.94)}
+#boot-box-label{font-family:var(--font-px);font-size:5px;color:var(--green);letter-spacing:3px;margin-bottom:24px;opacity:0.6}
+#boot-terminal{font-family:var(--font-px);font-size:7px;color:var(--green);line-height:2.2;min-height:160px}
+#boot-terminal .line{display:block;overflow:hidden;white-space:nowrap;width:0;opacity:0}
+#boot-terminal .line.ok .ok-tag{color:var(--yellow)}
+#boot-terminal .cursor{display:inline-block;width:8px;height:14px;background:var(--green);vertical-align:middle;animation:cur-blink 0.6s step-end infinite;margin-left:2px}
+@keyframes cur-blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* progress bar */
+#boot-bar-wrap{margin-top:28px;border:1px solid rgba(78,204,163,0.25);height:6px;position:relative;overflow:hidden;opacity:0}
+#boot-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--purple));transition:width 0.08s linear;position:relative}
+#boot-bar::after{content:'';position:absolute;right:0;top:0;height:100%;width:20px;background:rgba(255,255,255,0.4);filter:blur(4px)}
+#boot-pct{font-family:var(--font-px);font-size:5px;color:var(--green);text-align:right;margin-top:8px;opacity:0}
+
+/* glitch horizontal slices on exit */
+@keyframes glitch-exit{
+  0%{clip-path:inset(0 0 100% 0);transform:translateX(0)}
+  20%{clip-path:inset(0 0 80% 0);transform:translateX(-4px)}
+  40%{clip-path:inset(20% 0 60% 0);transform:translateX(6px)}
+  60%{clip-path:inset(40% 0 40% 0);transform:translateX(-3px)}
+  80%{clip-path:inset(60% 0 20% 0);transform:translateX(2px)}
+  100%{clip-path:inset(100% 0 0% 0);transform:translateX(0)}
+}
+#boot-glitch-a,#boot-glitch-b{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:0;background:var(--black)}
+
+/* page reveal */
+#page-content{opacity:0;transition:opacity 0.6s ease}
+#page-content.visible{opacity:1}
 </style>
 </head>
 <body>
@@ -113,6 +160,35 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 <div class="scanlines"></div>
 <div class="noise"></div>
 <canvas id="bg-canvas"></canvas>
+
+<!-- BOOT LOADER -->
+<div id="boot-loader">
+  <div id="boot-wipe"></div>
+  <div id="boot-static"></div>
+  <div id="boot-glitch-a"></div>
+  <div id="boot-glitch-b"></div>
+  <div class="boot-bracket tl"></div>
+  <div class="boot-bracket tr"></div>
+  <div class="boot-bracket bl"></div>
+  <div class="boot-bracket br"></div>
+  <div id="boot-box">
+    <div id="boot-box-label">// SYSTEM BOOT SEQUENCE v2.6.0</div>
+    <div id="boot-terminal">
+      <span class="line" id="l0">&gt; INITIALIZING YASH_OS.exe<span class="ok-tag"></span></span>
+      <span class="line" id="l1">&gt; LOADING SKILL_TREE.................. <span class="ok-tag">[ OK ]</span></span>
+      <span class="line" id="l2">&gt; COMPILING PROJECTS.................. <span class="ok-tag">[ OK ]</span></span>
+      <span class="line" id="l3">&gt; MOUNTING EXPERIENCE_LOG............. <span class="ok-tag">[ OK ]</span></span>
+      <span class="line" id="l4">&gt; CALIBRATING AESTHETIC_ENGINE........ <span class="ok-tag">[ OK ]</span></span>
+      <span class="line" id="l5">&gt; SPAWNING METEORS.................... <span class="ok-tag">[ OK ]</span></span>
+      <span class="line" id="l6">&gt; PLAYER PROFILE READY. LAUNCHING... <span class="cursor"></span></span>
+    </div>
+    <div id="boot-bar-wrap"><div id="boot-bar"></div></div>
+    <div id="boot-pct">0%</div>
+  </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div id="page-content">
 
 <nav class="nav">
   <div class="nav-inner">
@@ -283,6 +359,8 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
   </div>
 </div>
 
+</div><!-- end page-content -->
+
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const canvas = document.getElementById('bg-canvas');
 const ctx = canvas.getContext('2d');
@@ -319,6 +397,139 @@ const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isInt
 document.querySelectorAll('.pcard,.sblock,.xp-entry,.edu-box').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.5s ease,transform 0.5s ease,border-color 0.15s,box-shadow 0.15s';observer.observe(el);});
 const chars=['0','1','<','>','{','}','▸','★'];
 setInterval(()=>{if(document.querySelectorAll('.particle').length>8)return;const p=document.createElement('div');p.className='particle';p.textContent=chars[Math.floor(Math.random()*chars.length)];p.style.left=Math.random()*100+'vw';p.style.bottom='0';p.style.animationDuration=(4+Math.random()*4)+'s';p.style.animationDelay=Math.random()*2+'s';p.style.fontSize=(6+Math.floor(Math.random()*6))+'px';p.style.color=Math.random()<0.5?'#4ecca3':Math.random()<0.5?'#7c5cbf':'#e94560';document.body.appendChild(p);setTimeout(()=>p.remove(),(8+Math.random()*4)*1000);},800);
+
+// ============================================================
+// BOOT SEQUENCE
+// ============================================================
+(function(){
+  const loader   = document.getElementById('boot-loader');
+  const box      = document.getElementById('boot-box');
+  const barEl    = document.getElementById('boot-bar');
+  const pctEl    = document.getElementById('boot-pct');
+  const barWrap  = document.getElementById('boot-bar-wrap');
+  const staticEl = document.getElementById('boot-static');
+  const wipe     = document.getElementById('boot-wipe');
+  const brackets = document.querySelectorAll('.boot-bracket');
+  const lines    = document.querySelectorAll('#boot-terminal .line');
+  const content  = document.getElementById('page-content');
+
+  function ease(t){return t<0.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+
+  // util: animate a value over time
+  function tween(from,to,dur,cb,done){
+    const start=performance.now();
+    function tick(now){
+      const p=Math.min((now-start)/dur,1);
+      cb(from+(to-from)*ease(p));
+      if(p<1) requestAnimationFrame(tick); else {cb(to);done&&done();}
+    }
+    requestAnimationFrame(tick);
+  }
+
+  function flash(el,alpha,dur){
+    el.style.opacity=alpha;
+    setTimeout(()=>el.style.opacity=0,dur);
+  }
+
+  // type a line out char by char
+  function typeLine(el,delay,cb){
+    setTimeout(()=>{
+      el.style.opacity='1';
+      const full=el.innerHTML;
+      // strip inner HTML to get text width right – reveal with clip
+      el.style.width='0';
+      el.style.opacity='1';
+      const totalChars=el.textContent.length;
+      const dur=Math.min(totalChars*28,900);
+      tween(0,100,dur,p=>{el.style.width=p+'%'},cb);
+    },delay);
+  }
+
+  let t=0;
+  // Phase 1: flash static, show brackets
+  setTimeout(()=>{
+    // big static flash
+    flash(staticEl,0.18,80);
+    setTimeout(()=>flash(staticEl,0.12,60),120);
+    setTimeout(()=>flash(staticEl,0.08,40),200);
+    // brackets fade in
+    brackets.forEach((b,i)=>setTimeout(()=>{
+      b.style.transition='opacity 0.3s ease';b.style.opacity='1';
+    },i*60));
+  },100);
+
+  // Phase 2: box appears
+  setTimeout(()=>{
+    box.style.transition='opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+    box.style.opacity='1'; box.style.transform='scale(1)';
+    flash(staticEl,0.15,60);
+  },400);
+
+  // Phase 3: type lines
+  const lineDelays=[700,1050,1380,1680,1960,2220,2560];
+  const lineDurs  =[300, 300, 280, 260, 250, 240, 600];
+  lines.forEach((ln,i)=>{
+    typeLine(ln, lineDelays[i], null);
+  });
+
+  // Phase 4: progress bar starts at 2.6s, reaches 100% by 3.5s
+  setTimeout(()=>{
+    barWrap.style.transition='opacity 0.3s';barWrap.style.opacity='1';
+    pctEl.style.transition='opacity 0.3s';pctEl.style.opacity='1';
+    let pct=0;
+    const iv=setInterval(()=>{
+      pct=Math.min(pct+(Math.random()*4+2),100);
+      barEl.style.width=pct+'%';
+      pctEl.textContent=Math.floor(pct)+'%';
+      // random stutter glitches during loading
+      if(Math.random()<0.15) flash(staticEl,0.1,30);
+      if(pct>=100){clearInterval(iv);pctEl.textContent='100%'; beginExit();}
+    },40);
+  },2600);
+
+  // Phase 5: exit sequence
+  function beginExit(){
+    setTimeout(()=>{
+      // scanline wipe sweep down
+      wipe.style.transition='top 0.5s cubic-bezier(0.4,0,0.2,1)';
+      wipe.style.top='100%';
+
+      // multiple rapid glitch flashes
+      const flashTimes=[0,60,130,200,280];
+      flashTimes.forEach(ft=>setTimeout(()=>flash(staticEl,0.25,40),ft));
+
+      // RGB split glitch on box
+      setTimeout(()=>{
+        box.style.transition='none';
+        box.style.filter='hue-rotate(90deg) brightness(2)';
+        setTimeout(()=>{box.style.filter='none';},60);
+        setTimeout(()=>{box.style.filter='hue-rotate(-90deg) brightness(1.5)';},80);
+        setTimeout(()=>{box.style.filter='none';},130);
+      },150);
+
+      // slam full static
+      setTimeout(()=>{
+        staticEl.style.opacity='0.4';
+        setTimeout(()=>staticEl.style.opacity='0',100);
+      },320);
+
+      // loader collapse with glitch slices
+      setTimeout(()=>{
+        loader.style.transition='opacity 0.35s ease';
+        loader.style.opacity='0';
+        content.classList.add('visible');
+      },480);
+
+      // fully remove loader
+      setTimeout(()=>{
+        loader.style.display='none';
+        loader.classList.add('done');
+      },900);
+
+    },300);
+  }
+
+})();
 </script>
 </body>
 </html>
