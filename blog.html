@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yash Joshi — Blog</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#080810;--dark:#0d0d1a;--navy:#111128;--mid:#1a1a3e;
+  --accent:#e94560;--yellow:#f5a623;--green:#4ecca3;--purple:#7c5cbf;
+  --blue:#3a7bd5;--white:#eaeaea;--gray:#666;
+  --font-px:'Press Start 2P',monospace;--font-vt:'VT323',monospace;
+}
+html{scroll-behavior:smooth}
+body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-size:20px;line-height:1.6;overflow-x:hidden}
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.scanlines{position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.04) 3px,rgba(0,0,0,0.04) 4px);pointer-events:none;z-index:9998}
+.noise{position:fixed;top:0;left:0;width:100%;height:100%;opacity:0.025;pointer-events:none;z-index:9997;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
+.nav{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;justify-content:center;padding:14px 24px;background:rgba(8,8,16,0.7);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.05)}
+.nav-inner{display:flex;gap:8px;align-items:center}
+.nav-link{font-family:var(--font-px);font-size:6px;padding:7px 14px;color:var(--gray);text-decoration:none;border:1px solid transparent;transition:all 0.15s;letter-spacing:1px}
+.nav-link:hover,.nav-link.active{color:var(--green);border-color:rgba(78,204,163,0.4);background:rgba(78,204,163,0.06)}
+.nav-sep{color:var(--gray);font-family:var(--font-px);font-size:8px;opacity:0.3}
+.wrap{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 24px}
+.page-header{padding:120px 24px 60px;text-align:center;position:relative;z-index:1}
+.page-eyebrow{font-family:var(--font-px);font-size:7px;color:var(--green);letter-spacing:4px;margin-bottom:16px;animation:fade-in 0.6s ease both}
+.page-title{font-family:var(--font-px);font-size:18px;color:var(--yellow);text-shadow:0 0 30px rgba(245,166,35,0.4),4px 4px 0 var(--accent);margin-bottom:12px;animation:fade-in 0.6s 0.1s ease both}
+.page-sub{font-family:var(--font-vt);font-size:20px;color:#888;animation:fade-in 0.6s 0.2s ease both}
+@keyframes fade-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.px-divider{height:2px;background:linear-gradient(to right,transparent,var(--purple),transparent);opacity:0.4}
+.section{padding:60px 0 80px;position:relative;z-index:1}
+.section-head{display:flex;align-items:center;gap:16px;margin-bottom:40px}
+.section-tag{font-family:var(--font-px);font-size:9px;color:var(--yellow)}
+.section-line{flex:1;height:1px;background:linear-gradient(to right,rgba(245,166,35,0.5),transparent)}
+
+/* === BLOG POST CARDS === */
+.blog-list{display:flex;flex-direction:column;gap:16px}
+
+.bpost{background:rgba(17,17,40,0.8);border:1px solid rgba(255,255,255,0.07);position:relative;backdrop-filter:blur(8px);overflow:hidden;transition:border-color 0.15s,box-shadow 0.15s}
+.bpost.featured{border-color:rgba(245,166,35,0.25)}
+.bpost.open{border-color:rgba(78,204,163,0.45);box-shadow:0 0 30px rgba(78,204,163,0.06)}
+.bpost.featured.open{border-color:rgba(245,166,35,0.6);box-shadow:0 0 30px rgba(245,166,35,0.07)}
+
+/* Accent line at bottom — slides in on open */
+.bpost::after{content:'';position:absolute;bottom:0;left:0;width:100%;height:2px;background:var(--green);transform:scaleX(0);transform-origin:left;transition:transform 0.25s}
+.bpost.featured::after{background:var(--yellow)}
+.bpost.open::after{transform:scaleX(1)}
+
+/* Clickable header row */
+.bpost-header{padding:22px 28px;cursor:pointer;display:flex;align-items:flex-start;gap:16px;user-select:none}
+.bpost-header:hover .bpost-title{color:var(--green)}
+.bpost.featured .bpost-header:hover .bpost-title{color:var(--yellow)}
+
+.bpost-left{flex:1}
+.bpost-meta{display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.feat-label{font-family:var(--font-px);font-size:5px;color:var(--yellow);padding:2px 7px;border:1px solid var(--yellow);background:rgba(245,166,35,0.1)}
+.bpost-date{font-family:var(--font-px);font-size:5px;color:var(--gray)}
+.bpost-tag{font-family:var(--font-px);font-size:5px;padding:2px 7px;border:1px solid;display:inline-block}
+.bt-reflection{border-color:var(--purple);color:var(--purple);background:rgba(124,92,191,0.1)}
+.bt-tech{border-color:var(--blue);color:var(--blue);background:rgba(58,123,213,0.1)}
+.bt-life{border-color:var(--yellow);color:var(--yellow);background:rgba(245,166,35,0.1)}
+.bt-cs{border-color:var(--green);color:var(--green);background:rgba(78,204,163,0.1)}
+
+.bpost-title{font-family:var(--font-px);font-size:8px;color:var(--white);line-height:1.8;transition:color 0.15s;margin-bottom:8px}
+.bpost-excerpt{font-family:var(--font-vt);font-size:18px;color:#888;line-height:1.5}
+
+/* Toggle arrow */
+.bpost-toggle{font-family:var(--font-px);font-size:10px;color:var(--gray);flex-shrink:0;margin-top:4px;transition:transform 0.3s,color 0.15s;line-height:1}
+.bpost.open .bpost-toggle{transform:rotate(180deg);color:var(--green)}
+.bpost.featured.open .bpost-toggle{color:var(--yellow)}
+
+/* Expanded content */
+.bpost-body{max-height:0;overflow:hidden;transition:max-height 0.4s cubic-bezier(0.4,0,0.2,1)}
+.bpost.open .bpost-body{max-height:2000px}
+.bpost-body-inner{padding:0 28px 28px;border-top:1px solid rgba(255,255,255,0.05)}
+.bpost-body-inner p{font-family:var(--font-vt);font-size:20px;color:#bbb;line-height:1.7;margin-top:20px}
+.bpost-body-inner p + p{margin-top:14px}
+.bpost-body-inner h3{font-family:var(--font-px);font-size:7px;color:var(--green);margin-top:24px;margin-bottom:8px;line-height:1.8}
+.bpost.featured .bpost-body-inner h3{color:var(--yellow)}
+.bpost-body-inner code{font-family:var(--font-px);font-size:6px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);padding:2px 6px;color:var(--green)}
+
+.footer{padding:40px 0;text-align:center;position:relative;z-index:1}
+.footer-text{font-family:var(--font-px);font-size:6px;color:var(--gray);letter-spacing:2px}
+.footer-text span{color:var(--accent)}
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.particle{position:fixed;pointer-events:none;z-index:2;font-family:var(--font-px);font-size:8px;color:var(--green);opacity:0;animation:float-up 6s ease-in infinite}
+@keyframes float-up{0%{opacity:0;transform:translateY(0)}10%{opacity:0.4}90%{opacity:0}100%{opacity:0;transform:translateY(-80vh)}}
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<canvas id="bg-canvas"></canvas>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-link" href="index.html">[ HOME ]</a>
+    <span class="nav-sep">·</span>
+    <a class="nav-link active" href="blog.html">[ BLOG ]</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="page-eyebrow">[ TRANSMISSION LOG ]</div>
+  <div class="page-title">BLOG</div>
+  <div class="page-sub">Thoughts on code, school, and everything in between.</div>
+</div>
+
+<div class="px-divider"></div>
+
+<div class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="section-tag">// LATEST ENTRIES</div>
+      <div class="section-line"></div>
+    </div>
+
+    <!--
+    ╔══════════════════════════════════════════════════════════════════╗
+    ║  TO ADD A POST: copy the entire .bpost block below,            ║
+    ║  paste it at the TOP of .blog-list (newest first), and fill in: ║
+    ║                                                                  ║
+    ║  HEADER:                                                         ║
+    ║    feat-label  → remove this div if not a featured post         ║
+    ║    bpost-date  → e.g. "MARCH 2026"                              ║
+    ║    bpost-tag   → class: bt-reflection / bt-tech / bt-cs / bt-life ║
+    ║                   label: REFLECTION / TECH / CS / LIFE          ║
+    ║    bpost-title → your post title (ALL CAPS looks best)          ║
+    ║    bpost-excerpt → 1-2 sentence teaser shown collapsed          ║
+    ║                                                                  ║
+    ║  BODY (shown when expanded):                                     ║
+    ║    Use <p> for paragraphs, <h3> for section headers,            ║
+    ║    <code> for inline code snippets                              ║
+    ║                                                                  ║
+    ║  Add class="featured" to .bpost for gold styling on a post.    ║
+    ╚══════════════════════════════════════════════════════════════════╝
+    -->
+
+    <div class="blog-list">
+
+      <!-- POST 1 — featured, newest -->
+      <div class="bpost featured">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
+              <span class="feat-label">★ LATEST</span>
+              <span class="bpost-date">MARCH 2026</span>
+              <span class="bpost-tag bt-reflection">REFLECTION</span>
+            </div>
+            <div class="bpost-title">1B: WHAT I WISH I KNEW GOING IN</div>
+            <div class="bpost-excerpt">First term is done. Looking back at the chaos of 1A — what I'd tell myself on day one.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>1A hit differently than I expected. I came in thinking it would be an extension of high school CS — write some code, pass some tests, move on. It's not that. University CS expects you to think, not just execute. That distinction took me a few weeks to actually internalize.</p>
+            <h3>THE THING ABOUT PROOFS</h3>
+            <p>MATH 135 — Algebra for Honours Mathematics — was the biggest shift. I'd never written a real proof before. The first few weeks felt like learning a new language. Eventually something clicks: a proof isn't about computation, it's about constructing an airtight argument. Once that landed, I started enjoying it.</p>
+            <h3>ON BEING THE ONLY PROGRAMMER IN THE ROOM</h3>
+            <p>For the SE 101 team project, I ended up doing most of the actual coding. That's fine — I like coding. But I learned that writing software other people need to understand is a completely different skill than writing software that just works. Documentation isn't optional.</p>
+            <h3>WHAT I'D TELL 1A-ME</h3>
+            <p>Start assignments the day they're released, not the day before they're due. Go to office hours even when you think you understand the material. And sleep — seriously, the all-nighter math does not add up.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 2 -->
+      <div class="bpost">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
+              <span class="bpost-date">FEBRUARY 2026</span>
+              <span class="bpost-tag bt-tech">TECH</span>
+            </div>
+            <div class="bpost-title">BUILDING A 3D RENDERER FROM SCRATCH: WHAT I LEARNED</div>
+            <div class="bpost-excerpt">No libraries. No tutorials for the hard parts. Just math, C++, and a lot of wrong triangles on screen.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>PRISM started as a question: how hard could it be to draw a triangle on screen without OpenGL? The answer is: harder than you think, but not impossible — and every step of figuring it out teaches you something real.</p>
+            <h3>THE MATH FIRST</h3>
+            <p>Before any pixels, I built the math library from scratch. Vector and matrix operations, dot products, cross products, perspective projection. No external dependencies. Getting the projection matrix right took embarrassingly long — I kept confusing row-major and column-major conventions.</p>
+            <h3>WIN32 AND THE FRAME BUFFER</h3>
+            <p>I used Win32 GDI to push pixels to screen. The trick is a memory-mapped buffer — you write raw pixel data to memory and blit it to the window. Once that pipeline worked, everything else felt tractable. First triangle on screen was a genuinely exciting moment.</p>
+            <h3>WHAT THE PROJECT ACTUALLY TAUGHT ME</h3>
+            <p>Mostly: respect for abstraction layers. Every library you use is hiding enormous complexity. Building from scratch gives you a mental model of what's really happening — and that model pays dividends when something breaks in a higher-level project.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 3 -->
+      <div class="bpost">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
+              <span class="bpost-date">JANUARY 2026</span>
+              <span class="bpost-tag bt-cs">CS CONCEPTS</span>
+            </div>
+            <div class="bpost-title">POINTER ARITHMETIC IS ACTUALLY BEAUTIFUL</div>
+            <div class="bpost-excerpt">Everyone says pointers are confusing. I used to agree. Then something clicked.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>Pointers have a reputation. Ask any intro CS student and they'll tell you pointers are the thing that broke their brain. I was the same — until I started working with memory-mapped buffers in PRISM and the model finally snapped into place.</p>
+            <h3>THE MENTAL MODEL THAT HELPED</h3>
+            <p>Stop thinking of a pointer as a "reference to a variable." Think of it as a number — specifically, an address in a giant flat array called RAM. A <code>int*</code> is just a number that says "look at index N in memory and interpret those 4 bytes as an integer." Pointer arithmetic is just index arithmetic on that array.</p>
+            <h3>WHERE IT GETS ELEGANT</h3>
+            <p>Once you see pointers as addresses, things like <code>*(ptr + 3)</code> become obvious rather than cryptic. You're just offsetting your array index. Iterating over a buffer with a pointer is cleaner and often faster than indexed access. And suddenly, the linked list makes total visual sense in memory.</p>
+            <p>I'm not going to pretend dangling pointers and memory leaks aren't annoying. They are. But the underlying model is genuinely beautiful once it clicks.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 4 -->
+      <div class="bpost">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
+              <span class="bpost-date">NOVEMBER 2025</span>
+              <span class="bpost-tag bt-life">LIFE</span>
+            </div>
+            <div class="bpost-title">48 HOURS: BUILDING A GAME FOR NASA SPACE APPS</div>
+            <div class="bpost-excerpt">Sole programmer. 5-person team. A complete FPS game in two days. I didn't sleep. I didn't want it to end.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>NASA Space Apps is a global hackathon. You get a NASA-provided challenge, 48 hours, and a team. Our challenge involved making a concept for public science education. We decided the concept was: a game.</p>
+            <h3>THE PITCH</h3>
+            <p>Your ship crash-lands on an alien planet. The ecosystem runs on chemosynthesis — life without sunlight. You have to explore, gather data, and figure out how life works here. First-person, full physics, built in Unity.</p>
+            <h3>BEING THE ONLY PROGRAMMER</h3>
+            <p>Five people on the team. Four of them had ideas. One of them (me) had to turn those ideas into code in 48 hours. The scope kept growing — everyone had one more thing they wanted. I learned to say no, then yes to the important stuff, then stay up until 4am making it work.</p>
+            <h3>WHAT SHIPPED</h3>
+            <p>A functional FPS with player movement, a physics system, an exploration loop, a UI, and environmental storytelling. All in C# and Unity, from scratch, in two days. It wasn't perfect. It was real. That mattered.</p>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end blog-list -->
+  </div>
+</div>
+
+<div class="footer">
+  <div class="wrap">
+    <div class="footer-text">YASH JOSHI · <span>©</span> 2026 · <a href="index.html" style="color:var(--gray);text-decoration:none">← BACK TO HOME</a> <span class="blink">_</span></div>
+  </div>
+</div>
+
+<script>
+// Expand/collapse blog posts
+document.querySelectorAll('.bpost-header').forEach(header => {
+  header.addEventListener('click', () => {
+    const post = header.closest('.bpost');
+    const isOpen = post.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.bpost').forEach(p => p.classList.remove('open'));
+    // Toggle clicked
+    if (!isOpen) post.classList.add('open');
+  });
+});
+
+// Background canvas
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, stars = [], meteors = [], grid = [];
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; buildGrid(); }
+function buildGrid() { grid = []; const cols = Math.ceil(W/40), rows = Math.ceil(H/40); for(let r=0;r<rows;r++) for(let c=0;c<cols;c++) if(Math.random()<0.018) grid.push({x:c*40,y:r*40,alpha:Math.random()*0.06+0.02,size:Math.random()<0.3?2:1}); }
+function initStars() { stars=[]; for(let i=0;i<200;i++) stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+0.3,alpha:Math.random()*0.8+0.2,speed:Math.random()*0.02+0.005,phase:Math.random()*Math.PI*2,color:Math.random()<0.15?'#4ecca3':Math.random()<0.1?'#f5a623':'#ffffff'}); }
+function spawnMeteor() { if(meteors.length<3&&Math.random()<0.004) meteors.push({x:Math.random()*W*0.6,y:-10,vx:Math.random()*3+2,vy:Math.random()*3+2,len:Math.random()*80+60,alpha:1,color:Math.random()<0.5?'#4ecca3':'#ffffff'}); }
+let t=0, mouseX=400, mouseY=300;
+document.addEventListener('mousemove',e=>{mouseX=e.clientX;mouseY=e.clientY;});
+function draw() {
+  ctx.clearRect(0,0,W,H); t+=0.008;
+  const gx=W/2+(mouseX-W/2)*0.03, gy=H/2+(mouseY-H/2)*0.03;
+  const grad=ctx.createRadialGradient(gx,gy,0,gx,gy,Math.max(W,H)*0.8);
+  grad.addColorStop(0,'rgba(13,13,40,1)'); grad.addColorStop(0.4,'rgba(8,8,20,1)'); grad.addColorStop(1,'rgba(4,4,12,1)');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,W,H);
+  for(let i=0;i<3;i++){
+    const ay=H*(0.2+i*0.25)+Math.sin(t*0.3+i*2.1)*40;
+    const ag=ctx.createLinearGradient(0,ay-80,0,ay+80);
+    const colors=[['rgba(78,204,163,0.0)','rgba(78,204,163,0.025)','rgba(78,204,163,0.0)'],['rgba(124,92,191,0.0)','rgba(124,92,191,0.02)','rgba(124,92,191,0.0)'],['rgba(233,69,96,0.0)','rgba(233,69,96,0.015)','rgba(233,69,96,0.0)']];
+    ag.addColorStop(0,colors[i][0]); ag.addColorStop(0.5,colors[i][1]); ag.addColorStop(1,colors[i][2]);
+    ctx.fillStyle=ag; ctx.fillRect(0,ay-80,W,160);
+  }
+  grid.forEach(g=>{ctx.globalAlpha=g.alpha*(0.5+0.5*Math.sin(t+g.x));ctx.fillStyle='#4ecca3';ctx.fillRect(g.x,g.y,g.size,g.size);}); ctx.globalAlpha=1;
+  stars.forEach(s=>{const a=s.alpha*(0.5+0.5*Math.sin(t*s.speed*60+s.phase));ctx.globalAlpha=a;ctx.fillStyle=s.color;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill();}); ctx.globalAlpha=1;
+  spawnMeteor(); meteors=meteors.filter(m=>m.alpha>0.01);
+  meteors.forEach(m=>{ctx.save();ctx.globalAlpha=m.alpha*0.7;const mg=ctx.createLinearGradient(m.x,m.y,m.x-m.vx*(m.len/4),m.y-m.vy*(m.len/4));mg.addColorStop(0,m.color);mg.addColorStop(1,'transparent');ctx.strokeStyle=mg;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m.x,m.y);ctx.lineTo(m.x-m.vx*(m.len/4),m.y-m.vy*(m.len/4));ctx.stroke();ctx.restore();m.x+=m.vx;m.y+=m.vy;m.alpha-=0.012;});
+  const mg=ctx.createRadialGradient(mouseX,mouseY,0,mouseX,mouseY,200);mg.addColorStop(0,'rgba(78,204,163,0.04)');mg.addColorStop(1,'transparent');ctx.fillStyle=mg;ctx.fillRect(0,0,W,H);
+  requestAnimationFrame(draw);
+}
+resize(); initStars(); draw();
+window.addEventListener('resize',()=>{resize();initStars();});
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.style.opacity='1';e.target.style.transform='translateY(0)';}});},{threshold:0.1});
+document.querySelectorAll('.bpost').forEach(el=>{el.style.opacity='0';el.style.transform='translateY(20px)';el.style.transition='opacity 0.5s ease,transform 0.5s ease';observer.observe(el);});
+const chars=['0','1','<','>','{','}','▸','★'];
+setInterval(()=>{if(document.querySelectorAll('.particle').length>8)return;const p=document.createElement('div');p.className='particle';p.textContent=chars[Math.floor(Math.random()*chars.length)];p.style.left=Math.random()*100+'vw';p.style.bottom='0';p.style.animationDuration=(4+Math.random()*4)+'s';p.style.animationDelay=Math.random()*2+'s';p.style.fontSize=(6+Math.floor(Math.random()*6))+'px';p.style.color=Math.random()<0.5?'#4ecca3':Math.random()<0.5?'#7c5cbf':'#e94560';document.body.appendChild(p);setTimeout(()=>p.remove(),(8+Math.random()*4)*1000);},800);
+</script>
+</body>
+</html>
