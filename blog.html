@@ -142,12 +142,69 @@ body{background:var(--black);color:var(--white);font-family:var(--font-vt);font-
 
     <div class="blog-list">
 
-      <!-- POST 1 — featured, newest -->
+      <!-- POST 0 — featured, newest -->
       <div class="bpost featured">
         <div class="bpost-header">
           <div class="bpost-left">
             <div class="bpost-meta">
               <span class="feat-label">★ LATEST</span>
+              <span class="bpost-date">MARCH 2026</span>
+              <span class="bpost-tag bt-tech">TECH</span>
+            </div>
+            <div class="bpost-title">BUILDING PREPFORGE: ON-DEVICE AI WITHOUT THE CLOUD</div>
+            <div class="bpost-excerpt">LLaMA 3 running fully local. No API key, no cost, works offline. Here's how PrepForge was built in under two weeks.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>PrepForge came from a real frustration: every AI mock interview tool either costs money per session or sends your answers to some server. I wanted something that ran entirely on my machine, for free, forever. So I built it.</p>
+            <h3>THE CORE IDEA</h3>
+            <p>LLaMA 3 (8B) running locally through Ollama. The frontend is React + Vite, and a Vite dev proxy routes requests to the local Ollama server — no backend process needed, no CORS issues. Every AI call stays on-device.</p>
+            <h3>STREAMING + STRUCTURED OUTPUT</h3>
+            <p>Two things made the UX feel real. First: streaming. Responses render token-by-token using <code>ReadableStream</code> — it feels like the AI is thinking, not just loading. Second: structured JSON output. Instead of asking for freeform feedback, every prompt uses Ollama's <code>format: json</code> mode to enforce a schema — score, strengths, improvements, tip. If the model hallucinates malformed JSON, the app retries with a simplified prompt.</p>
+            <h3>MONACO EDITOR</h3>
+            <p>For coding questions, I embedded Monaco — the same engine as VS Code. It supports JS, Python, TypeScript, Java, C++. The user's code gets captured and sent as part of the answer. Having a real editor instead of a textarea changes the feel of the whole thing.</p>
+            <h3>THE DEBRIEF</h3>
+            <p>After 5 questions: per-question scores, average, individual notes, and a streaming AI-generated summary synthesizing all 5 answers. The summary is itself a live streaming request. Watching it generate in real time is genuinely satisfying to look at.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 0b -->
+      <div class="bpost">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
+              <span class="bpost-date">FEBRUARY 2026</span>
+              <span class="bpost-tag bt-tech">TECH</span>
+            </div>
+            <div class="bpost-title">CONDUIT: BUILDING A CHAT APP WITH RAW SOCKETS AND NO MERCY</div>
+            <div class="bpost-excerpt">No networking libs. No abstractions. Just <code>socket()</code>, <code>bind()</code>, <code>accept()</code>, and a lot of mutex pain.</div>
+          </div>
+          <div class="bpost-toggle">▾</div>
+        </div>
+        <div class="bpost-body">
+          <div class="bpost-body-inner">
+            <p>Conduit started as a question: could I build a real distributed chat application using nothing but raw POSIX system calls? No Boost.Asio, no networking wrappers, no nothing. Just the syscalls the textbook talks about but never makes you actually use.</p>
+            <h3>THE NETWORKING LAYER</h3>
+            <p>Every socket operation is a direct syscall. <code>socket()</code>, <code>bind()</code>, <code>listen()</code>, <code>accept()</code>, <code>connect()</code>, <code>send()</code>, <code>recv()</code>. I wrote two classes — <code>socketListen</code> for the server side and <code>socketClient</code> for the client — that manage the full lifecycle. Hostname resolution uses <code>getaddrinfo()</code>. That's the entire networking stack.</p>
+            <h3>THREADING BUGS ARE HUMBLING</h3>
+            <p>The server uses a thread-per-client model. Each connection gets a dedicated <code>std::thread</code>. A mutex protects the shared client map. Sounds simple. It wasn't. I hit three distinct classes of concurrency bugs: threading races, mutex deadlocks from inconsistent lock ordering, and pointer invalidation while iterating the client map mid-broadcast. Each one took systematic behavioral tracing and strategic logging to nail down.</p>
+            <h3>THE BONUS FEATURES</h3>
+            <p>The ncurses TUI splits the terminal into a scrolling message window and a fixed input bar. The <code>/image &lt;url&gt;</code> command runs a 4-stage pipeline: libcurl fetch → stb_image decode → stb_image_resize → greyscale-to-ASCII mapping. And there's a full in-chat tic-tac-toe game, server-side state, broadcast after every move. Because why not.</p>
+            <h3>DISTRIBUTION</h3>
+            <p>It ships as a Homebrew tap. Two commands to install. That part felt great to figure out.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- POST 2 -->
+
+      <div class="bpost">
+        <div class="bpost-header">
+          <div class="bpost-left">
+            <div class="bpost-meta">
               <span class="bpost-date">MARCH 2026</span>
               <span class="bpost-tag bt-reflection">REFLECTION</span>
             </div>
